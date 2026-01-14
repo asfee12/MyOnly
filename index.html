@@ -1,0 +1,3050 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEJAK - Sistem Diary & Analisis Psikologi Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* VARIABLES GLOBAL PREMIUM */
+        :root {
+            --primary-color: #2C3E50;
+            --secondary-color: #34495E;
+            --accent-color: #1ABC9C;
+            --danger-color: #E74C3C;
+            --warning-color: #F39C12;
+            --success-color: #27AE60;
+            --light-color: #ECF0F1;
+            --dark-color: #2C3E50;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --radius: 10px;
+            --transition: all 0.3s ease;
+            --spacing-lg: 32px;
+            --spacing-md: 24px;
+            --spacing-sm: 16px;
+            --spacing-xs: 8px;
+            --font-primary: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* RESET & BASE */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-md);
+        }
+
+        /* UTILITY CLASSES */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .mt-2 { margin-top: var(--spacing-sm); }
+        .mt-3 { margin-top: var(--spacing-md); }
+        .mb-2 { margin-bottom: var(--spacing-sm); }
+        .mb-3 { margin-bottom: var(--spacing-md); }
+        .p-3 { padding: var(--spacing-md); }
+        .p-2 { padding: var(--spacing-sm); }
+
+        /* LOADING OVERLAY */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* MODAL SYSTEM */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: var(--spacing-md);
+        }
+
+        .modal-footer {
+            padding: var(--spacing-md);
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            color: var(--danger-color);
+        }
+
+        /* NOTIFICATION SYSTEM */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            background: white;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification.success { border-left: 4px solid var(--success-color); }
+        .notification.error { border-left: 4px solid var(--danger-color); }
+        .notification.warning { border-left: 4px solid var(--warning-color); }
+        .notification.info { border-left: 4px solid var(--accent-color); }
+
+        /* AUTH PAGES */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+        }
+
+        .auth-header {
+            padding: var(--spacing-lg);
+            text-align: center;
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .auth-body {
+            padding: var(--spacing-lg);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: var(--radius);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #16A085;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .auth-footer {
+            padding: var(--spacing-md);
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+
+        .link {
+            color: var(--accent-color);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        /* MAIN LAYOUT */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .brand i {
+            font-size: 1.5rem;
+        }
+
+        .brand-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: var(--spacing-md) 0;
+        }
+
+        .nav-item {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            color: #555;
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(26, 188, 156, 0.1);
+            color: var(--accent-color);
+            border-left-color: var(--accent-color);
+        }
+
+        .nav-item.active {
+            background: rgba(26, 188, 156, 0.15);
+            color: var(--accent-color);
+            border-left-color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .sidebar-footer {
+            padding: var(--spacing-md);
+            border-top: 1px solid #eee;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: white;
+            padding: var(--spacing-md) var(--spacing-lg);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* CONTENT AREA */
+        .content-area {
+            padding: var(--spacing-lg);
+        }
+
+        /* CARD SYSTEM */
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: var(--spacing-md);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: var(--spacing-md);
+        }
+
+        .card-footer {
+            padding: var(--spacing-md);
+            border-top: 1px solid #eee;
+            background: #f9f9f9;
+        }
+
+        /* DASHBOARD */
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: var(--radius);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: var(--spacing-md);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* DIARY EDITOR */
+        .diary-editor {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .editor-header {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid #eee;
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .editor-title {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--radius);
+            font-size: 1.2rem;
+        }
+
+        .editor-body {
+            min-height: 400px;
+        }
+
+        .editor-content {
+            width: 100%;
+            min-height: 400px;
+            padding: var(--spacing-md);
+            border: none;
+            font-size: 16px;
+            line-height: 1.6;
+            font-family: var(--font-primary);
+            resize: vertical;
+        }
+
+        .editor-content:focus {
+            outline: none;
+        }
+
+        .editor-footer {
+            padding: var(--spacing-md);
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .auto-save-status {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* DIARY LIST */
+        .diary-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+        }
+
+        .diary-item {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .diary-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .diary-date {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: #f8f9fa;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .diary-preview {
+            padding: var(--spacing-md);
+            max-height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .diary-preview::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(to bottom, transparent, white);
+        }
+
+        .diary-actions {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        /* ANALYSIS */
+        .analysis-section {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .analysis-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .analysis-title {
+            color: var(--accent-color);
+            margin-bottom: var(--spacing-sm);
+            font-weight: 600;
+        }
+
+        .emotional-spectrum {
+            display: flex;
+            gap: 4px;
+            margin: var(--spacing-md) 0;
+        }
+
+        .emotion-bar {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .emotion-bar:hover {
+            transform: scaleY(1.5);
+        }
+
+        .emotion-label {
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        /* TREND CHART */
+        .trend-chart-container {
+            background: white;
+            border-radius: var(--radius);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+        }
+
+        /* INSIGHTS */
+        .insight-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: var(--radius);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .insight-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        /* SETTINGS */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+        }
+
+        .theme-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: var(--transition);
+        }
+
+        .theme-option.active {
+            border-color: var(--accent-color);
+        }
+
+        /* ADMIN SPECIFIC */
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .admin-stat {
+            background: white;
+            border-radius: var(--radius);
+            padding: var(--spacing-md);
+            text-align: center;
+        }
+
+        .admin-table-container {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .admin-table th {
+            background: #f8f9fa;
+            padding: var(--spacing-sm) var(--spacing-md);
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary-color);
+            border-bottom: 2px solid #eee;
+        }
+
+        .admin-table td {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-bottom: 1px solid #eee;
+        }
+
+        .admin-table tr:hover {
+            background: rgba(26, 188, 156, 0.05);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-user {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+        }
+
+        .badge-admin {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger-color);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar .brand-text,
+            .sidebar .nav-item span {
+                display: none;
+            }
+            
+            .sidebar .nav-item {
+                justify-content: center;
+                padding: var(--spacing-sm);
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content-area {
+                padding: var(--spacing-sm);
+            }
+            
+            .stats-grid,
+            .diary-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        /* ANIMATIONS */
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p id="loadingText">Memuat sistem JEJAK...</p>
+    </div>
+
+    <!-- NOTIFICATION CONTAINER -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <!-- AUTH PAGES (Initial View) -->
+    <div id="authPages" class="auth-container">
+        <!-- LOGIN PAGE -->
+        <div id="loginPage" class="auth-card fade-in">
+            <div class="auth-header">
+                <h1><i class="fas fa-book-open"></i> JEJAK</h1>
+                <p>Sistem Diary & Analisis Psikologi Premium</p>
+            </div>
+            <div class="auth-body">
+                <h2 class="text-center mb-3">Masuk ke Aplikasi</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="loginIdentifier">Email atau Username</label>
+                        <input type="text" id="loginIdentifier" class="form-control" required 
+                               placeholder="Masukkan email atau username">
+                        <div class="form-feedback hidden" id="loginIdentifierError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" class="form-control" required 
+                               placeholder="Masukkan password">
+                        <div class="form-feedback hidden" id="loginPasswordError"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-sign-in-alt"></i> Masuk ke Aplikasi
+                    </button>
+                </form>
+                <div class="mt-3 text-center">
+                    <p>Belum punya akun? <span class="link" onclick="showRegisterPage()">Daftar di sini</span></p>
+                    <p class="text-small" style="color: #666; font-size: 0.9rem; margin-top: 20px;">
+                        <i class="fas fa-info-circle"></i> Demo: admin / admin123
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- REGISTER PAGE -->
+        <div id="registerPage" class="auth-card hidden">
+            <div class="auth-header">
+                <h1><i class="fas fa-user-plus"></i> Daftar Akun Baru</h1>
+                <p>Mulai perjalanan refleksi Anda</p>
+            </div>
+            <div class="auth-body">
+                <h2 class="text-center mb-3">Buat Akun USER</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label class="form-label" for="registerUsername">Username</label>
+                        <input type="text" id="registerUsername" class="form-control" required 
+                               placeholder="Pilih username unik">
+                        <div class="form-feedback hidden" id="registerUsernameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" class="form-control" required 
+                               placeholder="email@contoh.com">
+                        <div class="form-feedback hidden" id="registerEmailError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" class="form-control" required 
+                               placeholder="Minimal 8 karakter">
+                        <div class="form-feedback hidden" id="registerPasswordError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="registerConfirmPassword">Konfirmasi Password</label>
+                        <input type="password" id="registerConfirmPassword" class="form-control" required 
+                               placeholder="Ulangi password">
+                        <div class="form-feedback hidden" id="registerConfirmPasswordError"></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" id="registerTerms" class="form-check-input" required>
+                            <label class="form-check-label" for="registerTerms">
+                                Saya setuju dengan <span class="link">Syarat & Ketentuan</span> dan 
+                                <span class="link">Kebijakan Privasi</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-user-plus"></i> Daftar Sekarang
+                    </button>
+                </form>
+                <div class="mt-3 text-center">
+                    <p>Sudah punya akun? <span class="link" onclick="showLoginPage()">Masuk di sini</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER (Hidden Initially) -->
+    <div id="appContainer" class="app-container hidden">
+        <!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="brand" onclick="loadPage('dashboard'); return false;">
+                    <i class="fas fa-book-open"></i>
+                    <span class="brand-text">JEJAK</span>
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <!-- USER NAVIGATION -->
+                <div id="userNav">
+                    <a href="#" class="nav-item active" onclick="loadPage('dashboard'); return false;">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('diary'); return false;">
+                        <i class="fas fa-book"></i>
+                        <span>Diary Saya</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('newDiary'); return false;">
+                        <i class="fas fa-edit"></i>
+                        <span>Tulis Diary Baru</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('analysis'); return false;">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analisis Psikologi</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('trend'); return false;">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Trend Mental</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('insights'); return false;">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>Insights</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('settings'); return false;">
+                        <i class="fas fa-cog"></i>
+                        <span>Pengaturan</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('account'); return false;">
+                        <i class="fas fa-user"></i>
+                        <span>Akun Saya</span>
+                    </a>
+                </div>
+
+                <!-- ADMIN NAVIGATION -->
+                <div id="adminNav" class="hidden">
+                    <a href="#" class="nav-item active" onclick="loadPage('adminDashboard'); return false;">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Admin Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('adminUsers'); return false;">
+                        <i class="fas fa-users"></i>
+                        <span>Kelola User</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('adminDiaries'); return false;">
+                        <i class="fas fa-book"></i>
+                        <span>Semua Diary</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('adminAnalysis'); return false;">
+                        <i class="fas fa-brain"></i>
+                        <span>Analisis Global</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('adminTrends'); return false;">
+                        <i class="fas fa-globe"></i>
+                        <span>Trend Global</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('adminInsights'); return false;">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>Kelola Insights</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('adminSettings'); return false;">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>Pengaturan Sistem</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('adminLogs'); return false;">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Log Aktivitas</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="loadPage('dashboard'); return false;">
+                        <i class="fas fa-user"></i>
+                        <span>Mode User</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="avatar" id="sidebarAvatar">U</div>
+                    <div class="user-details">
+                        <div id="sidebarUsername" style="font-weight: 600;"></div>
+                        <div id="sidebarRole" style="font-size: 0.9rem; color: #666;"></div>
+                    </div>
+                </div>
+                <button class="btn btn-outline btn-block mt-2" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- TOP BAR -->
+            <div class="topbar">
+                <button class="mobile-menu-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title" id="pageTitle">Dashboard</h1>
+                <div class="user-menu">
+                    <div class="avatar" id="topbarAvatar">U</div>
+                    <div>
+                        <div id="topbarUsername" style="font-weight: 600;"></div>
+                        <div id="topbarRole" style="font-size: 0.9rem; color: #666;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENT AREA -->
+            <div class="content-area" id="contentArea">
+                <!-- DASHBOARD USER -->
+                <div id="dashboardPage" class="page-content">
+                    <div class="welcome-banner">
+                        <h1 id="greetingText">Selamat datang kembali!</h1>
+                        <p id="dateTimeDisplay" class="mt-2"></p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="diaryCount">0</div>
+                            <div class="stat-label">Total Diary</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="streakCount">0</div>
+                            <div class="stat-label">Hari Berturut-turut</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="moodScore">-</div>
+                            <div class="stat-label">Kondisi Mental Terkini</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="analysisCount">0</div>
+                            <div class="stat-label">Analisis Tersedia</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-book-open"></i> Diary Terakhir</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="lastDiaryPreview">
+                                <p class="text-muted">Belum ada diary. Mulai dengan menulis diary pertama Anda.</p>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="loadPage('newDiary')">
+                                <i class="fas fa-edit"></i> Tulis Diary Baru
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h3><i class="fas fa-lightbulb"></i> Insight Hari Ini</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="dailyInsight">
+                                <p>Menulis tentang perasaan adalah langkah pertama untuk memahami diri sendiri.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DASHBOARD ADMIN -->
+                <div id="adminDashboardPage" class="page-content hidden">
+                    <div class="welcome-banner">
+                        <h1><i class="fas fa-tachometer-alt"></i> Admin Command Center</h1>
+                        <p>Sistem JEJAK - Kontrol Penuh</p>
+                    </div>
+
+                    <div class="admin-stats">
+                        <div class="admin-stat">
+                            <div class="stat-value" id="totalUsers">0</div>
+                            <div class="stat-label">Total User</div>
+                        </div>
+                        <div class="admin-stat">
+                            <div class="stat-value" id="totalDiaries">0</div>
+                            <div class="stat-label">Total Diary</div>
+                        </div>
+                        <div class="admin-stat">
+                            <div class="stat-value" id="activeToday">0</div>
+                            <div class="stat-label">Aktif Hari Ini</div>
+                        </div>
+                        <div class="admin-stat">
+                            <div class="stat-value" id="systemHealth">100%</div>
+                            <div class="stat-label">Kesehatan Sistem</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bolt"></i> Quick Access</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="quick-access-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                                <button class="btn btn-secondary" onclick="loadPage('adminUsers')">
+                                    <i class="fas fa-users"></i> Kelola User
+                                </button>
+                                <button class="btn btn-secondary" onclick="loadPage('adminDiaries')">
+                                    <i class="fas fa-book"></i> Semua Diary
+                                </button>
+                                <button class="btn btn-secondary" onclick="loadPage('adminAnalysis')">
+                                    <i class="fas fa-brain"></i> Analisis Global
+                                </button>
+                                <button class="btn btn-secondary" onclick="loadPage('adminTrends')">
+                                    <i class="fas fa-chart-bar"></i> Trend Global
+                                </button>
+                                <button class="btn btn-secondary" onclick="loadPage('adminInsights')">
+                                    <i class="fas fa-bullhorn"></i> Kelola Insights
+                                </button>
+                                <button class="btn btn-secondary" onclick="loadPage('adminLogs')">
+                                    <i class="fas fa-clipboard-list"></i> Log Aktivitas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h3><i class="fas fa-history"></i> Aktivitas Sistem Terbaru</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="recentActivity">
+                                <p>Tidak ada aktivitas terbaru.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DIARY LIST PAGE -->
+                <div id="diaryPage" class="page-content hidden">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2><i class="fas fa-book"></i> Diary Saya</h2>
+                        <button class="btn btn-primary" onclick="loadPage('newDiary')">
+                            <i class="fas fa-plus"></i> Diary Baru
+                        </button>
+                    </div>
+                    <div class="diary-list" id="diaryList">
+                        <!-- Diary items will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- NEW DIARY PAGE -->
+                <div id="newDiaryPage" class="page-content hidden">
+                    <div class="diary-editor">
+                        <div class="editor-header">
+                            <input type="text" id="diaryTitle" class="editor-title" placeholder="Judul Diary (opsional)">
+                        </div>
+                        <div class="editor-body">
+                            <textarea id="diaryContent" class="editor-content" 
+                                      placeholder="Mulai menulis di sini... Ungkapkan perasaan, pikiran, dan pengalaman Anda. Sistem akan menganalisis secara otomatis."></textarea>
+                        </div>
+                        <div class="editor-footer">
+                            <div class="auto-save-status" id="autoSaveStatus">
+                                <i class="fas fa-save"></i> Otomatis tersimpan
+                            </div>
+                            <div>
+                                <button class="btn btn-secondary" onclick="loadPage('diary')">
+                                    <i class="fas fa-times"></i> Batal
+                                </button>
+                                <button class="btn btn-primary" onclick="saveDiary()">
+                                    <i class="fas fa-save"></i> Simpan & Analisis
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ANALYSIS PAGE -->
+                <div id="analysisPage" class="page-content hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-chart-line"></i> Analisis Psikologi</h2>
+                            <button class="btn btn-outline" onclick="refreshAnalysis()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="analysisContent">
+                                <p>Memuat analisis...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TREND PAGE -->
+                <div id="trendPage" class="page-content hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-chart-bar"></i> Trend Mental Saya</h2>
+                            <select id="trendPeriod" class="form-control" style="width: auto;" onchange="loadTrendData()">
+                                <option value="7">7 Hari Terakhir</option>
+                                <option value="30" selected>30 Hari Terakhir</option>
+                                <option value="90">3 Bulan Terakhir</option>
+                            </select>
+                        </div>
+                        <div class="card-body">
+                            <div class="trend-chart-container">
+                                <div class="chart-placeholder" id="trendChart">
+                                    <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 16px;"></i>
+                                    <p>Grafik trend akan ditampilkan di sini</p>
+                                </div>
+                            </div>
+                            <div id="trendInsights">
+                                <!-- Trend insights will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INSIGHTS PAGE -->
+                <div id="insightsPage" class="page-content hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-lightbulb"></i> Insights Reflektif</h2>
+                        </div>
+                        <div class="card-body">
+                            <div id="insightsContent">
+                                <div class="insight-card">
+                                    <div class="insight-icon">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                    <h3>Refleksi Diri</h3>
+                                    <p>Setiap kata yang Anda tulis adalah cermin dari perjalanan batin Anda. Melihat kembali tulisan lama membantu melihat pola pertumbuhan dan perubahan.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SETTINGS PAGE -->
+                <div id="settingsPage" class="page-content hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-cog"></i> Pengaturan</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="settings-grid">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3><i class="fas fa-palette"></i> Tema & Tampilan</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <label class="form-label">Pilih Tema</label>
+                                            <div class="theme-selector">
+                                                <div class="theme-option active" style="background: #2C3E50;" 
+                                                     onclick="changeTheme('default')"></div>
+                                                <div class="theme-option" style="background: #1A5276;" 
+                                                     onclick="changeTheme('dark-blue')"></div>
+                                                <div class="theme-option" style="background: #7D3C98;" 
+                                                     onclick="changeTheme('purple')"></div>
+                                                <div class="theme-option" style="background: #27AE60;" 
+                                                     onclick="changeTheme('green')"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="fontSize">Ukuran Font</label>
+                                            <select id="fontSize" class="form-control" onchange="changeFontSize(this.value)">
+                                                <option value="small">Kecil</option>
+                                                <option value="medium" selected>Sedang</option>
+                                                <option value="large">Besar</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3><i class="fas fa-bell"></i> Notifikasi</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="notifReminder" class="form-check-input" checked>
+                                                <label class="form-check-label" for="notifReminder">
+                                                    Ingatkan untuk menulis diary
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="notifAnalysis" class="form-check-input" checked>
+                                                <label class="form-check-label" for="notifAnalysis">
+                                                    Beritahu saat analisis baru tersedia
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3><i class="fas fa-shield-alt"></i> Privasi & Keamanan</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="privacyLock" class="form-check-input">
+                                                <label class="form-check-label" for="privacyLock">
+                                                    Kunci aplikasi dengan PIN
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-outline btn-block" onclick="exportData()">
+                                            <i class="fas fa-download"></i> Ekspor Data Saya
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACCOUNT PAGE -->
+                <div id="accountPage" class="page-content hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-user"></i> Akun Saya</h2>
+                        </div>
+                        <div class="card-body">
+                            <form id="accountForm">
+                                <div class="form-group">
+                                    <label class="form-label" for="accountUsername">Username</label>
+                                    <input type="text" id="accountUsername" class="form-control" value="user123">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="accountEmail">Email</label>
+                                    <input type="email" id="accountEmail" class="form-control" value="user@example.com">
+                                </div>
+                                <button type="button" class="btn btn-outline" onclick="showChangePasswordModal()">
+                                    <i class="fas fa-key"></i> Ganti Password
+                                </button>
+                            </form>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-danger" onclick="showDeleteAccountModal()">
+                                <i class="fas fa-trash"></i> Hapus Akun Saya
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADMIN PAGES -->
+                <div id="adminUsersPage" class="page-content hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-users"></i> Kelola User</h2>
+                            <button class="btn btn-primary" onclick="showCreateUserModal()">
+                                <i class="fas fa-user-plus"></i> Tambah User
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="admin-table-container">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Terdaftar</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody">
+                                        <!-- Users will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="adminDiariesPage" class="page-content hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-book"></i> Semua Diary</h2>
+                        </div>
+                        <div class="card-body">
+                            <div id="adminDiariesList">
+                                <!-- All diaries will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add more admin pages as needed -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div id="modalContainer"></div>
+
+    <!-- TEMPLATES (Hidden) -->
+    <template id="diaryItemTemplate">
+        <div class="diary-item" onclick="viewDiary('{{id}}')">
+            <div class="diary-date">
+                <i class="far fa-calendar"></i> {{date}}
+            </div>
+            <div class="diary-preview">
+                <h4>{{title}}</h4>
+                <p>{{preview}}</p>
+            </div>
+            <div class="diary-actions">
+                <button class="btn btn-sm" onclick="editDiary('{{id}}'); event.stopPropagation();">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteDiary('{{id}}'); event.stopPropagation();">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <!-- CORE JAVASCRIPT -->
+    <script>
+        // ============================================
+        // SISTEM JEJAK - KODE INTI
+        // ============================================
+
+        // STATE MANAGEMENT
+        let currentUser = null;
+        let currentRole = null;
+        let diaryData = [];
+        let userData = [];
+        let systemData = {
+            users: [],
+            diaries: [],
+            analyses: [],
+            insights: [],
+            logs: []
+        };
+
+        // INITIALIZATION
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSystem();
+        });
+
+        function initializeSystem() {
+            showLoading('Memulai sistem JEJAK...');
+            
+            // Load data from localStorage or initialize
+            setTimeout(() => {
+                loadSystemData();
+                checkAuthentication();
+                hideLoading();
+            }, 1500);
+        }
+
+        function loadSystemData() {
+            // Load from localStorage or create default data
+            const savedData = localStorage.getItem('jejak_system_data');
+            
+            if (savedData) {
+                systemData = JSON.parse(savedData);
+            } else {
+                // Initialize with default data
+                systemData = {
+                    users: [
+                        {
+                            id: 'admin001',
+                            username: 'admin',
+                            email: 'admin@jejak.com',
+                            password: 'admin123', // In real app, this would be hashed
+                            role: 'ADMIN',
+                            createdAt: new Date().toISOString(),
+                            settings: {}
+                        }
+                    ],
+                    diaries: [],
+                    analyses: [],
+                    insights: [],
+                    logs: []
+                };
+                saveSystemData();
+            }
+            
+            // Update current user if logged in
+            const session = getSession();
+            if (session) {
+                currentUser = systemData.users.find(u => u.id === session.userId);
+                currentRole = currentUser?.role || null;
+            }
+        }
+
+        function saveSystemData() {
+            localStorage.setItem('jejak_system_data', JSON.stringify(systemData));
+            localStorage.setItem('jejak_last_save', new Date().toISOString());
+        }
+
+        // AUTHENTICATION SYSTEM
+        function checkAuthentication() {
+            const session = getSession();
+            
+            if (session && session.expiresAt > Date.now()) {
+                // Valid session exists
+                currentUser = systemData.users.find(u => u.id === session.userId);
+                currentRole = currentUser?.role || null;
+                
+                if (currentUser) {
+                    showApp();
+                    updateUIForRole();
+                    loadPage('dashboard');
+                    logActivity(`${currentUser.username} logged in`);
+                    return;
+                }
+            }
+            
+            // No valid session
+            showAuth();
+        }
+
+        function getSession() {
+            const sessionStr = localStorage.getItem('jejak_session');
+            if (!sessionStr) return null;
+            
+            try {
+                return JSON.parse(sessionStr);
+            } catch {
+                return null;
+            }
+        }
+
+        function setSession(user) {
+            const session = {
+                userId: user.id,
+                role: user.role,
+                expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days
+            };
+            
+            localStorage.setItem('jejak_session', JSON.stringify(session));
+            currentUser = user;
+            currentRole = user.role;
+        }
+
+        function clearSession() {
+            localStorage.removeItem('jejak_session');
+            currentUser = null;
+            currentRole = null;
+        }
+
+        // UI MANAGEMENT
+        function showLoading(message = 'Memuat...') {
+            document.getElementById('loadingText').textContent = message;
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function showNotification(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            
+            notification.innerHTML = `
+                <i class="${icons[type] || icons.info}"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Auto remove
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, duration);
+        }
+
+        function showAuth() {
+            document.getElementById('authPages').classList.remove('hidden');
+            document.getElementById('appContainer').classList.add('hidden');
+            showLoginPage();
+        }
+
+        function showApp() {
+            document.getElementById('authPages').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
+            updateUserInfo();
+        }
+
+        function showLoginPage() {
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('registerPage').classList.add('hidden');
+        }
+
+        function showRegisterPage() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('registerPage').classList.remove('hidden');
+        }
+
+        // FORM HANDLERS
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const identifier = document.getElementById('loginIdentifier').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            showLoading('Mengautentikasi...');
+            
+            setTimeout(() => {
+                // Find user by email or username
+                const user = systemData.users.find(u => 
+                    (u.email === identifier || u.username === identifier) && 
+                    u.password === password // In real app, compare hashed passwords
+                );
+                
+                if (user) {
+                    setSession(user);
+                    showApp();
+                    updateUIForRole();
+                    loadPage('dashboard');
+                    showNotification(`Selamat datang, ${user.username}!`, 'success');
+                    logActivity(`${user.username} logged in`);
+                } else {
+                    showNotification('Email/username atau password salah', 'error');
+                }
+                
+                hideLoading();
+            }, 1000);
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            // Validation
+            if (password !== confirmPassword) {
+                showNotification('Password dan konfirmasi password tidak cocok', 'error');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showNotification('Password minimal 8 karakter', 'error');
+                return;
+            }
+            
+            // Check uniqueness
+            const existingUser = systemData.users.find(u => 
+                u.username === username || u.email === email
+            );
+            
+            if (existingUser) {
+                showNotification('Username atau email sudah terdaftar', 'error');
+                return;
+            }
+            
+            showLoading('Membuat akun...');
+            
+            setTimeout(() => {
+                // Create new user - ALWAYS as USER role
+                const newUser = {
+                    id: 'user_' + Date.now(),
+                    username,
+                    email,
+                    password, // In real app, hash this
+                    role: 'USER', // ENFORCED: Always USER from registration
+                    createdAt: new Date().toISOString(),
+                    settings: {
+                        theme: 'default',
+                        fontSize: 'medium'
+                    }
+                };
+                
+                systemData.users.push(newUser);
+                saveSystemData();
+                
+                // Auto login
+                setSession(newUser);
+                showApp();
+                updateUIForRole();
+                loadPage('dashboard');
+                showNotification('Akun berhasil dibuat! Selamat menggunakan JEJAK.', 'success');
+                logActivity(`New user registered: ${username}`);
+                
+                hideLoading();
+            }, 1500);
+        });
+
+        // PAGE LOADING SYSTEM
+        function loadPage(pageName) {
+            showLoading('Memuat halaman...');
+            
+            // Update active nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            setTimeout(() => {
+                // Show requested page
+                let pageElement;
+                
+                switch(pageName) {
+                    case 'dashboard':
+                        pageElement = document.getElementById('dashboardPage');
+                        document.title = 'Dashboard - JEJAK';
+                        updateDashboard();
+                        break;
+                        
+                    case 'adminDashboard':
+                        pageElement = document.getElementById('adminDashboardPage');
+                        document.title = 'Admin Dashboard - JEJAK';
+                        updateAdminDashboard();
+                        break;
+                        
+                    case 'diary':
+                        pageElement = document.getElementById('diaryPage');
+                        document.title = 'Diary Saya - JEJAK';
+                        loadDiaryList();
+                        break;
+                        
+                    case 'newDiary':
+                        pageElement = document.getElementById('newDiaryPage');
+                        document.title = 'Tulis Diary - JEJAK';
+                        setupDiaryEditor();
+                        break;
+                        
+                    case 'analysis':
+                        pageElement = document.getElementById('analysisPage');
+                        document.title = 'Analisis Psikologi - JEJAK';
+                        loadAnalysis();
+                        break;
+                        
+                    case 'trend':
+                        pageElement = document.getElementById('trendPage');
+                        document.title = 'Trend Mental - JEJAK';
+                        loadTrendData();
+                        break;
+                        
+                    case 'insights':
+                        pageElement = document.getElementById('insightsPage');
+                        document.title = 'Insights - JEJAK';
+                        loadInsights();
+                        break;
+                        
+                    case 'settings':
+                        pageElement = document.getElementById('settingsPage');
+                        document.title = 'Pengaturan - JEJAK';
+                        break;
+                        
+                    case 'account':
+                        pageElement = document.getElementById('accountPage');
+                        document.title = 'Akun Saya - JEJAK';
+                        loadAccountInfo();
+                        break;
+                        
+                    case 'adminUsers':
+                        pageElement = document.getElementById('adminUsersPage');
+                        document.title = 'Kelola User - JEJAK';
+                        loadUsersTable();
+                        break;
+                        
+                    case 'adminDiaries':
+                        pageElement = document.getElementById('adminDiariesPage');
+                        document.title = 'Semua Diary - JEJAK';
+                        loadAllDiaries();
+                        break;
+                        
+                    default:
+                        pageElement = document.getElementById('dashboardPage');
+                        document.title = 'Dashboard - JEJAK';
+                }
+                
+                if (pageElement) {
+                    pageElement.classList.remove('hidden');
+                    pageElement.classList.add('fade-in');
+                    
+                    // Set active nav
+                    const activeNav = document.querySelector(`.nav-item[onclick*="${pageName}"]`);
+                    if (activeNav) {
+                        activeNav.classList.add('active');
+                    }
+                }
+                
+                updatePageTitle(pageName);
+                hideLoading();
+            }, 500);
+        }
+
+        function updatePageTitle(pageName) {
+            const titles = {
+                dashboard: 'Dashboard',
+                adminDashboard: 'Admin Dashboard',
+                diary: 'Diary Saya',
+                newDiary: 'Tulis Diary Baru',
+                analysis: 'Analisis Psikologi',
+                trend: 'Trend Mental',
+                insights: 'Insights',
+                settings: 'Pengaturan',
+                account: 'Akun Saya',
+                adminUsers: 'Kelola User',
+                adminDiaries: 'Semua Diary'
+            };
+            
+            document.getElementById('pageTitle').textContent = titles[pageName] || 'JEJAK';
+        }
+
+        // USER INTERFACE UPDATES
+        function updateUIForRole() {
+            if (currentRole === 'ADMIN') {
+                document.getElementById('userNav').classList.add('hidden');
+                document.getElementById('adminNav').classList.remove('hidden');
+            } else {
+                document.getElementById('userNav').classList.remove('hidden');
+                document.getElementById('adminNav').classList.add('hidden');
+            }
+            
+            updateUserInfo();
+        }
+
+        function updateUserInfo() {
+            if (!currentUser) return;
+            
+            const avatarText = currentUser.username.charAt(0).toUpperCase();
+            
+            // Update all avatar places
+            document.querySelectorAll('.avatar').forEach(avatar => {
+                avatar.textContent = avatarText;
+            });
+            
+            // Update username displays
+            document.querySelectorAll('#sidebarUsername, #topbarUsername').forEach(el => {
+                el.textContent = currentUser.username;
+            });
+            
+            // Update role displays
+            document.querySelectorAll('#sidebarRole, #topbarRole').forEach(el => {
+                el.textContent = currentRole === 'ADMIN' ? 'Administrator' : 'User';
+                el.style.color = currentRole === 'ADMIN' ? 'var(--danger-color)' : '#666';
+            });
+            
+            // Update greeting
+            const hour = new Date().getHours();
+            let greeting = 'Selamat datang';
+            if (hour < 12) greeting = 'Selamat pagi';
+            else if (hour < 18) greeting = 'Selamat siang';
+            else greeting = 'Selamat malam';
+            
+            document.getElementById('greetingText').textContent = `${greeting}, ${currentUser.username}!`;
+        }
+
+        // DASHBOARD FUNCTIONS
+        function updateDashboard() {
+            if (!currentUser) return;
+            
+            const userDiaries = systemData.diaries.filter(d => d.userId === currentUser.id);
+            const userAnalyses = systemData.analyses.filter(a => a.userId === currentUser.id);
+            
+            // Update stats
+            document.getElementById('diaryCount').textContent = userDiaries.length;
+            document.getElementById('analysisCount').textContent = userAnalyses.length;
+            
+            // Calculate streak
+            const streak = calculateStreak(userDiaries);
+            document.getElementById('streakCount').textContent = streak;
+            
+            // Get latest mood
+            if (userAnalyses.length > 0) {
+                const latest = userAnalyses[userAnalyses.length - 1];
+                document.getElementById('moodScore').textContent = latest.moodScore || '8/10';
+            }
+            
+            // Update last diary preview
+            if (userDiaries.length > 0) {
+                const lastDiary = userDiaries[userDiaries.length - 1];
+                const preview = lastDiary.content.substring(0, 150) + '...';
+                document.getElementById('lastDiaryPreview').innerHTML = `
+                    <h4>${lastDiary.title || 'Tanpa Judul'}</h4>
+                    <p>${preview}</p>
+                    <p class="text-muted" style="margin-top: 10px;">
+                        <i class="far fa-calendar"></i> ${formatDate(lastDiary.createdAt)}
+                    </p>
+                `;
+            }
+            
+            // Update datetime
+            const now = new Date();
+            document.getElementById('dateTimeDisplay').textContent = 
+                formatDate(now) + ' • ' + formatTime(now);
+        }
+
+        function updateAdminDashboard() {
+            // Update stats
+            document.getElementById('totalUsers').textContent = systemData.users.length;
+            document.getElementById('totalDiaries').textContent = systemData.diaries.length;
+            
+            // Calculate active today
+            const today = new Date().toISOString().split('T')[0];
+            const activeToday = systemData.users.filter(u => {
+                // Simplified: consider user active if they have recent activity
+                return true; // In real app, check last login
+            }).length;
+            
+            document.getElementById('activeToday').textContent = activeToday;
+            
+            // Load recent activity
+            const recentLogs = systemData.logs.slice(-5).reverse();
+            const activityHtml = recentLogs.map(log => `
+                <div style="padding: 8px 0; border-bottom: 1px solid #eee;">
+                    <div style="font-weight: 500;">${log.action}</div>
+                    <div style="font-size: 0.9rem; color: #666;">
+                        ${formatTime(new Date(log.timestamp))} • oleh ${log.userId}
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('recentActivity').innerHTML = 
+                activityHtml || '<p>Tidak ada aktivitas terbaru.</p>';
+        }
+
+        // DIARY FUNCTIONS
+        function setupDiaryEditor() {
+            const editor = document.getElementById('diaryContent');
+            const status = document.getElementById('autoSaveStatus');
+            
+            let saveTimeout;
+            editor.addEventListener('input', function() {
+                clearTimeout(saveTimeout);
+                status.innerHTML = '<i class="fas fa-sync-alt pulse"></i> Menyimpan...';
+                
+                saveTimeout = setTimeout(() => {
+                    autoSaveDraft();
+                    status.innerHTML = '<i class="fas fa-check"></i> Tersimpan';
+                    
+                    setTimeout(() => {
+                        status.innerHTML = '<i class="fas fa-save"></i> Otomatis tersimpan';
+                    }, 2000);
+                }, 2000);
+            });
+        }
+
+        function autoSaveDraft() {
+            const title = document.getElementById('diaryTitle').value;
+            const content = document.getElementById('diaryContent').value;
+            
+            if (!content.trim()) return;
+            
+            const draft = {
+                title,
+                content,
+                timestamp: new Date().toISOString()
+            };
+            
+            localStorage.setItem('jejak_draft', JSON.stringify(draft));
+        }
+
+        function saveDiary() {
+            const title = document.getElementById('diaryTitle').value;
+            const content = document.getElementById('diaryContent').value;
+            
+            if (!content.trim()) {
+                showNotification('Diary tidak boleh kosong', 'error');
+                return;
+            }
+            
+            showLoading('Menyimpan dan menganalisis...');
+            
+            setTimeout(() => {
+                const diary = {
+                    id: 'diary_' + Date.now(),
+                    userId: currentUser.id,
+                    title: title || `Diary ${formatDate(new Date())}`,
+                    content,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    tags: extractTags(content)
+                };
+                
+                systemData.diaries.push(diary);
+                
+                // Generate analysis
+                const analysis = generatePsychologicalAnalysis(content, diary.id);
+                systemData.analyses.push(analysis);
+                
+                saveSystemData();
+                
+                // Clear draft
+                localStorage.removeItem('jejak_draft');
+                
+                showNotification('Diary berhasil disimpan dan dianalisis!', 'success');
+                logActivity(`${currentUser.username} created diary: ${diary.title}`);
+                
+                hideLoading();
+                loadPage('analysis');
+            }, 2000);
+        }
+
+        function loadDiaryList() {
+            if (!currentUser) return;
+            
+            const userDiaries = systemData.diaries
+                .filter(d => d.userId === currentUser.id)
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            const container = document.getElementById('diaryList');
+            
+            if (userDiaries.length === 0) {
+                container.innerHTML = `
+                    <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <i class="fas fa-book" style="font-size: 3rem; color: #ddd; margin-bottom: 16px;"></i>
+                        <h3>Belum ada diary</h3>
+                        <p>Mulai perjalanan refleksi Anda dengan menulis diary pertama.</p>
+                        <button class="btn btn-primary mt-2" onclick="loadPage('newDiary')">
+                            <i class="fas fa-plus"></i> Tulis Diary Pertama
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const template = document.getElementById('diaryItemTemplate').innerHTML;
+            let html = '';
+            
+            userDiaries.forEach(diary => {
+                const preview = diary.content.length > 100 
+                    ? diary.content.substring(0, 100) + '...' 
+                    : diary.content;
+                
+                let itemHtml = template
+                    .replace('{{id}}', diary.id)
+                    .replace('{{date}}', formatDate(diary.createdAt))
+                    .replace('{{title}}', diary.title || 'Tanpa Judul')
+                    .replace('{{preview}}', preview);
+                
+                html += itemHtml;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function viewDiary(diaryId) {
+            const diary = systemData.diaries.find(d => d.id === diaryId);
+            
+            if (!diary || (currentRole !== 'ADMIN' && diary.userId !== currentUser.id)) {
+                showNotification('Akses ditolak', 'error');
+                return;
+            }
+            
+            // Show diary in modal
+            showModal(`
+                <div class="modal-header">
+                    <h3>${diary.title || 'Diary'}</h3>
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="color: #666; margin-bottom: 20px;">
+                        <i class="far fa-calendar"></i> ${formatDate(diary.createdAt)}
+                        ${currentRole === 'ADMIN' ? 
+                          `<br><i class="fas fa-user"></i> User ID: ${diary.userId}` : ''}
+                    </p>
+                    <div style="white-space: pre-line; line-height: 1.8;">
+                        ${diary.content}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    ${diary.userId === currentUser.id || currentRole === 'ADMIN' ? 
+                      `<button class="btn btn-danger" onclick="deleteDiary('${diaryId}'); closeModal();">
+                        <i class="fas fa-trash"></i> Hapus
+                       </button>` : ''}
+                    <button class="btn btn-secondary" onclick="closeModal()">Tutup</button>
+                </div>
+            `);
+        }
+
+        function deleteDiary(diaryId) {
+            if (!confirm('Hapus diary ini? Tindakan ini tidak dapat dibatalkan.')) return;
+            
+            const index = systemData.diaries.findIndex(d => d.id === diaryId);
+            
+            if (index !== -1) {
+                const diary = systemData.diaries[index];
+                
+                // Check permission
+                if (currentRole !== 'ADMIN' && diary.userId !== currentUser.id) {
+                    showNotification('Anda tidak memiliki izin untuk menghapus diary ini', 'error');
+                    return;
+                }
+                
+                systemData.diaries.splice(index, 1);
+                
+                // Also remove associated analysis
+                const analysisIndex = systemData.analyses.findIndex(a => a.diaryId === diaryId);
+                if (analysisIndex !== -1) {
+                    systemData.analyses.splice(analysisIndex, 1);
+                }
+                
+                saveSystemData();
+                
+                showNotification('Diary berhasil dihapus', 'success');
+                logActivity(`${currentUser.username} deleted diary: ${diary.title}`);
+                
+                // Refresh current view
+                if (document.getElementById('diaryPage').classList.contains('hidden')) {
+                    loadPage('diary');
+                } else {
+                    loadDiaryList();
+                }
+            }
+        }
+
+        // PSYCHOLOGICAL ANALYSIS
+        function generatePsychologicalAnalysis(content, diaryId) {
+            // Simple analysis based on content
+            // In real app, this would use NLP or more sophisticated analysis
+            
+            const words = content.toLowerCase().split(/\s+/);
+            
+            // Emotional analysis
+            const emotionalWords = {
+                positif: ['senang', 'bahagia', 'gembira', 'puas', 'bangga', 'tenang', 'cinta'],
+                negatif: ['sedih', 'marah', 'kecewa', 'takut', 'cemas', 'stress', 'lelah'],
+                netral: ['pikir', 'rasa', 'coba', 'mungkin', 'ingin', 'harap']
+            };
+            
+            let positiveCount = 0;
+            let negativeCount = 0;
+            
+            words.forEach(word => {
+                if (emotionalWords.positif.includes(word)) positiveCount++;
+                if (emotionalWords.negatif.includes(word)) negativeCount++;
+            });
+            
+            const totalEmotional = positiveCount + negativeCount;
+            const moodScore = totalEmotional > 0 
+                ? Math.round((positiveCount / totalEmotional) * 10) 
+                : 5;
+            
+            // Detect patterns
+            const hasQuestion = content.includes('?');
+            const hasExclamation = content.includes('!');
+            const isLong = content.length > 500;
+            
+            return {
+                id: 'analysis_' + Date.now(),
+                diaryId,
+                userId: currentUser.id,
+                moodScore,
+                emotionalBreakdown: {
+                    positive: positiveCount,
+                    negative: negativeCount,
+                    dominant: positiveCount > negativeCount ? 'positif' : 
+                             negativeCount > positiveCount ? 'negatif' : 'netral'
+                },
+                patterns: {
+                    introspective: hasQuestion,
+                    expressive: hasExclamation,
+                    detailed: isLong
+                },
+                insights: generateInsightsFromContent(content),
+                recommendations: generateRecommendations(moodScore),
+                generatedAt: new Date().toISOString()
+            };
+        }
+
+        function generateInsightsFromContent(content) {
+            const insights = [
+                "Tulisan Anda menunjukkan proses refleksi yang dalam.",
+                "Anda sedang mengolah pengalaman dengan kesadaran penuh.",
+                "Setiap kata yang Anda tulis adalah langkah menuju pemahaman diri.",
+                "Proses menulis membantu mengorganisir pikiran dan perasaan.",
+                "Melihat pola tulisan dapat membantu melihat pola pikiran.",
+                "Kejujuran dalam menulis adalah kunci untuk pertumbuhan pribadi.",
+                "Setiap emosi yang Anda rasakan valid dan penting.",
+                "Menulis membantu memberikan jarak antara Anda dan perasaan.",
+                "Proses ini menunjukkan komitmen terhadap perkembangan diri.",
+                "Refleksi yang konsisten membangun ketahanan mental."
+            ];
+            
+            return insights[Math.floor(Math.random() * insights.length)];
+        }
+
+        function generateRecommendations(moodScore) {
+            if (moodScore >= 7) {
+                return [
+                    "Pertahankan kebiasaan menulis untuk menjaga kesejahteraan mental",
+                    "Bagikan energi positif melalui aktivitas yang bermakna",
+                    "Renungkan sumber kebahagiaan Anda sebagai panduan masa depan"
+                ];
+            } else if (moodScore >= 4) {
+                return [
+                    "Luangkan waktu untuk self-care dan relaksasi",
+                    "Coba teknik pernapasan dalam saat merasa overwhelmed",
+                    "Tetaplah menulis meski perasaan campur aduk"
+                ];
+            } else {
+                return [
+                    "Pertimbangkan untuk berbicara dengan profesional jika perasaan berat berlanjut",
+                    "Fokus pada aktivitas kecil yang dapat dikendalikan",
+                    "Ingatlah bahwa perasaan ini bersifat sementara"
+                ];
+            }
+        }
+
+        function loadAnalysis() {
+            if (!currentUser) return;
+            
+            const userAnalyses = systemData.analyses
+                .filter(a => a.userId === currentUser.id)
+                .sort((a, b) => new Date(b.generatedAt) - new Date(a.generatedAt));
+            
+            const container = document.getElementById('analysisContent');
+            
+            if (userAnalyses.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <i class="fas fa-brain" style="font-size: 3rem; color: #ddd; margin-bottom: 16px;"></i>
+                        <h3>Belum ada analisis</h3>
+                        <p>Tulis diary pertama untuk mendapatkan analisis psikologi.</p>
+                        <button class="btn btn-primary mt-2" onclick="loadPage('newDiary')">
+                            <i class="fas fa-edit"></i> Tulis Diary Pertama
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const latest = userAnalyses[0];
+            
+            const emotionalSpectrum = `
+                <div class="emotional-spectrum">
+                    <div class="emotion-bar" style="background: #27AE60; width: ${latest.emotionalBreakdown.positive * 10}%;" 
+                         title="Positif: ${latest.emotionalBreakdown.positive}"></div>
+                    <div class="emotion-bar" style="background: #E74C3C; width: ${latest.emotionalBreakdown.negative * 10}%;" 
+                         title="Negatif: ${latest.emotionalBreakdown.negative}"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                    <span class="emotion-label">Positif</span>
+                    <span class="emotion-label">Negatif</span>
+                </div>
+            `;
+            
+            container.innerHTML = `
+                <div class="analysis-section">
+                    <h3 class="analysis-title"><i class="fas fa-heartbeat"></i> Kondisi Emosional</h3>
+                    <div class="analysis-card">
+                        <h4>Skor Mood: ${latest.moodScore}/10</h4>
+                        <p>Emosi dominan: <strong>${latest.emotionalBreakdown.dominant}</strong></p>
+                        ${emotionalSpectrum}
+                        <p class="mt-3">Analisis berdasarkan konten diary terakhir Anda.</p>
+                    </div>
+                </div>
+                
+                <div class="analysis-section">
+                    <h3 class="analysis-title"><i class="fas fa-lightbulb"></i> Insight Reflektif</h3>
+                    <div class="analysis-card">
+                        <p style="font-style: italic; font-size: 1.1rem;">"${latest.insights}"</p>
+                        <p class="mt-3">Insight ini dihasilkan dari pola tulisan dan tema yang muncul dalam diary Anda.</p>
+                    </div>
+                </div>
+                
+                <div class="analysis-section">
+                    <h3 class="analysis-title"><i class="fas fa-hands-helping"></i> Saran & Rekomendasi</h3>
+                    <div class="analysis-card">
+                        <ul style="padding-left: 20px;">
+                            ${latest.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                        <p class="mt-3">Rekomendasi ini bersifat suportif dan tidak menggantikan konsultasi profesional.</p>
+                    </div>
+                </div>
+                
+                <div class="analysis-section">
+                    <h3 class="analysis-title"><i class="fas fa-info-circle"></i> Tentang Analisis Ini</h3>
+                    <div class="analysis-card">
+                        <p><i class="far fa-clock"></i> Dibuat: ${formatDate(latest.generatedAt)}</p>
+                        <p><i class="fas fa-shield-alt"></i> Privasi: Analisis ini hanya dapat diakses oleh Anda.</p>
+                        <p><i class="fas fa-exclamation-triangle"></i> Peringatan: Hasil analisis tidak dimaksudkan sebagai diagnosis klinis.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // TREND DATA
+        function loadTrendData() {
+            if (!currentUser) return;
+            
+            const period = parseInt(document.getElementById('trendPeriod').value);
+            const userAnalyses = systemData.analyses
+                .filter(a => a.userId === currentUser.id)
+                .slice(-period);
+            
+            const container = document.getElementById('trendInsights');
+            
+            if (userAnalyses.length === 0) {
+                container.innerHTML = `
+                    <div class="card" style="margin-top: 20px;">
+                        <div class="card-body">
+                            <p>Belum ada data trend. Mulai menulis diary untuk melihat perkembangan.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Calculate trend insights
+            const moodScores = userAnalyses.map(a => a.moodScore);
+            const averageMood = (moodScores.reduce((a, b) => a + b, 0) / moodScores.length).toFixed(1);
+            const trendDirection = moodScores[0] < moodScores[moodScores.length - 1] ? 'meningkat' : 'menurun';
+            
+            const insights = `
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-line"></i> Insight Trend</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">${averageMood}</div>
+                                <div class="stat-label">Rata-rata Mood</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${userAnalyses.length}</div>
+                                <div class="stat-label">Analisis dalam Periode</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${trendDirection}</div>
+                                <div class="stat-label">Tren Terkini</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${calculateConsistency(userAnalyses)}%</div>
+                                <div class="stat-label">Konsistensi</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <h4>Interpretasi Trend</h4>
+                            <p>Berdasarkan data ${period} hari terakhir:</p>
+                            <ul style="padding-left: 20px; margin-top: 10px;">
+                                <li>Skor mood Anda menunjukkan tren <strong>${trendDirection}</strong></li>
+                                <li>Konsistensi menulis: <strong>${calculateConsistency(userAnalyses)}%</strong></li>
+                                <li>Rata-rata kondisi emosional: <strong>${getMoodDescription(averageMood)}</strong></li>
+                                <li>Pola: ${detectPattern(userAnalyses)}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = insights;
+        }
+
+        // ADMIN FUNCTIONS
+        function loadUsersTable() {
+            if (currentRole !== 'ADMIN') {
+                showNotification('Akses admin diperlukan', 'error');
+                loadPage('dashboard');
+                return;
+            }
+            
+            const tbody = document.getElementById('usersTableBody');
+            let html = '';
+            
+            systemData.users.forEach(user => {
+                const isCurrentUser = user.id === currentUser.id;
+                
+                html += `
+                    <tr>
+                        <td>${user.id.substring(0, 8)}...</td>
+                        <td>
+                            ${user.username}
+                            ${isCurrentUser ? ' <span style="color: var(--accent-color);">(Anda)</span>' : ''}
+                        </td>
+                        <td>${user.email}</td>
+                        <td>
+                            <span class="badge ${user.role === 'ADMIN' ? 'badge-admin' : 'badge-user'}">
+                                ${user.role}
+                            </span>
+                        </td>
+                        <td>${formatDate(user.createdAt)}</td>
+                        <td>
+                            <button class="btn btn-sm" onclick="editUser('${user.id}')" 
+                                    ${isCurrentUser ? 'disabled' : ''}>
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteUser('${user.id}')"
+                                    ${isCurrentUser ? 'disabled' : ''}>
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html || '<tr><td colspan="6" style="text-align: center;">Tidak ada user</td></tr>';
+        }
+
+        function loadAllDiaries() {
+            if (currentRole !== 'ADMIN') {
+                showNotification('Akses admin diperlukan', 'error');
+                return;
+            }
+            
+            const container = document.getElementById('adminDiariesList');
+            
+            if (systemData.diaries.length === 0) {
+                container.innerHTML = `
+                    <div class="card" style="text-align: center; padding: 40px;">
+                        <i class="fas fa-book" style="font-size: 3rem; color: #ddd; margin-bottom: 16px;"></i>
+                        <h3>Belum ada diary di sistem</h3>
+                        <p>User belum membuat diary.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by date, newest first
+            const sortedDiaries = [...systemData.diaries].sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            );
+            
+            let html = '';
+            
+            sortedDiaries.forEach(diary => {
+                const user = systemData.users.find(u => u.id === diary.userId);
+                const preview = diary.content.length > 150 
+                    ? diary.content.substring(0, 150) + '...' 
+                    : diary.content;
+                
+                html += `
+                    <div class="card mt-2">
+                        <div class="card-body">
+                            <h4>${diary.title || 'Tanpa Judul'}</h4>
+                            <p style="color: #666; margin-bottom: 10px;">
+                                <i class="fas fa-user"></i> ${user?.username || 'Unknown'} 
+                                • <i class="far fa-calendar"></i> ${formatDate(diary.createdAt)}
+                            </p>
+                            <p>${preview}</p>
+                            <div style="margin-top: 10px;">
+                                <button class="btn btn-sm" onclick="viewDiary('${diary.id}')">
+                                    <i class="fas fa-eye"></i> Lihat
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteDiary('${diary.id}')">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // UTILITY FUNCTIONS
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function extractTags(content) {
+            // Simple tag extraction - in real app would be more sophisticated
+            const words = content.toLowerCase().split(/\s+/);
+            const commonTags = ['kerja', 'keluarga', 'teman', 'cinta', 'stres', 'bahagia', 'masa depan'];
+            
+            return commonTags.filter(tag => 
+                content.toLowerCase().includes(tag)
+            ).slice(0, 3);
+        }
+
+        function calculateStreak(diaries) {
+            if (diaries.length === 0) return 0;
+            
+            // Sort by date
+            const sorted = [...diaries].sort((a, b) => 
+                new Date(b.createdAt) - new Date(a.createdAt)
+            );
+            
+            let streak = 0;
+            let currentDate = new Date();
+            
+            for (let diary of sorted) {
+                const diaryDate = new Date(diary.createdAt);
+                const diffDays = Math.floor((currentDate - diaryDate) / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === streak) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+            
+            return streak;
+        }
+
+        function calculateConsistency(analyses) {
+            if (analyses.length < 2) return 100;
+            
+            const dates = analyses.map(a => new Date(a.generatedAt).toDateString());
+            const uniqueDays = new Set(dates).size;
+            const totalDays = analyses.length;
+            
+            return Math.round((uniqueDays / totalDays) * 100);
+        }
+
+        function getMoodDescription(score) {
+            if (score >= 8) return 'Sangat Baik';
+            if (score >= 6) return 'Baik';
+            if (score >= 4) return 'Cukup';
+            if (score >= 2) return 'Kurang Baik';
+            return 'Sangat Kurang Baik';
+        }
+
+        function detectPattern(analyses) {
+            const scores = analyses.map(a => a.moodScore);
+            const variance = Math.max(...scores) - Math.min(...scores);
+            
+            if (variance > 5) return 'Fluktuatif - emosi bervariasi cukup besar';
+            if (variance > 2) return 'Stabil dengan variasi normal';
+            return 'Sangat stabil - konsistensi emosional tinggi';
+        }
+
+        function logActivity(action) {
+            const log = {
+                id: 'log_' + Date.now(),
+                action,
+                userId: currentUser?.id || 'system',
+                timestamp: new Date().toISOString()
+            };
+            
+            systemData.logs.push(log);
+            
+            // Keep only last 100 logs
+            if (systemData.logs.length > 100) {
+                systemData.logs = systemData.logs.slice(-100);
+            }
+            
+            saveSystemData();
+        }
+
+        // MODAL SYSTEM
+        function showModal(content) {
+            const modalContainer = document.getElementById('modalContainer');
+            
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'modal-overlay';
+            modalOverlay.id = 'modalOverlay';
+            modalOverlay.onclick = function(e) {
+                if (e.target === this) closeModal();
+            };
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal fade-in';
+            modal.innerHTML = content;
+            
+            modalOverlay.appendChild(modal);
+            modalContainer.appendChild(modalOverlay);
+            
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modalOverlay = document.getElementById('modalOverlay');
+            if (modalOverlay) {
+                modalOverlay.remove();
+            }
+            document.body.style.overflow = '';
+        }
+
+        function showChangePasswordModal() {
+            showModal(`
+                <div class="modal-header">
+                    <h3><i class="fas fa-key"></i> Ganti Password</h3>
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Password Saat Ini</label>
+                        <input type="password" id="currentPassword" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password Baru</label>
+                        <input type="password" id="newPassword" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Konfirmasi Password Baru</label>
+                        <input type="password" id="confirmNewPassword" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="changePassword()">
+                        <i class="fas fa-save"></i> Simpan Password Baru
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeModal()">Batal</button>
+                </div>
+            `);
+        }
+
+        function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmNewPassword').value;
+            
+            if (current !== currentUser.password) { // In real app, verify hashed password
+                showNotification('Password saat ini salah', 'error');
+                return;
+            }
+            
+            if (newPass.length < 8) {
+                showNotification('Password baru minimal 8 karakter', 'error');
+                return;
+            }
+            
+            if (newPass !== confirm) {
+                showNotification('Konfirmasi password tidak cocok', 'error');
+                return;
+            }
+            
+            // Update password
+            currentUser.password = newPass; // In real app, hash this
+            saveSystemData();
+            
+            showNotification('Password berhasil diubah', 'success');
+            closeModal();
+            logActivity(`${currentUser.username} changed password`);
+        }
+
+        function showDeleteAccountModal() {
+            showModal(`
+                <div class="modal-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Hapus Akun</h3>
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert" style="background: #FDEDEC; border: 1px solid #F5B7B1; border-radius: 5px; padding: 15px; color: #C0392B;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>PERINGATAN: Tindakan ini tidak dapat dibatalkan!</strong>
+                    </div>
+                    <p>Dengan menghapus akun Anda:</p>
+                    <ul style="padding-left: 20px; margin-top: 10px;">
+                        <li>Semua diary Anda akan dihapus permanen</li>
+                        <li>Semua analisis akan dihapus</li>
+                        <li>Data tidak dapat dipulihkan</li>
+                        <li>Anda perlu mendaftar ulang untuk menggunakan JEJAK kembali</li>
+                    </ul>
+                    <div class="form-group mt-3">
+                        <label class="form-label">Ketik "HAPUS" untuk konfirmasi</label>
+                        <input type="text" id="deleteConfirm" class="form-control" placeholder="HAPUS">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" onclick="confirmDeleteAccount()">
+                        <i class="fas fa-trash"></i> Hapus Akun Permanen
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeModal()">Batal</button>
+                </div>
+            `);
+        }
+
+        function confirmDeleteAccount() {
+            const confirmText = document.getElementById('deleteConfirm').value;
+            
+            if (confirmText !== 'HAPUS') {
+                showNotification('Konfirmasi tidak sesuai', 'error');
+                return;
+            }
+            
+            showLoading('Menghapus akun...');
+            
+            setTimeout(() => {
+                // Remove user data
+                systemData.users = systemData.users.filter(u => u.id !== currentUser.id);
+                systemData.diaries = systemData.diaries.filter(d => d.userId !== currentUser.id);
+                systemData.analyses = systemData.analyses.filter(a => a.userId !== currentUser.id);
+                
+                saveSystemData();
+                clearSession();
+                
+                hideLoading();
+                closeModal();
+                showNotification('Akun berhasil dihapus', 'success');
+                showAuth();
+            }, 2000);
+        }
+
+        function editUser(userId) {
+            if (currentRole !== 'ADMIN') return;
+            
+            const user = systemData.users.find(u => u.id === userId);
+            if (!user) return;
+            
+            showModal(`
+                <div class="modal-header">
+                    <h3><i class="fas fa-edit"></i> Edit User</h3>
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" id="editUsername" class="form-control" value="${user.username}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="editEmail" class="form-control" value="${user.email}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Role</label>
+                        <select id="editRole" class="form-control">
+                            <option value="USER" ${user.role === 'USER' ? 'selected' : ''}>USER</option>
+                            <option value="ADMIN" ${user.role === 'ADMIN' ? 'selected' : ''}>ADMIN</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select id="editStatus" class="form-control">
+                            <option value="active">Aktif</option>
+                            <option value="inactive">Nonaktif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveUserEdit('${userId}')">
+                        <i class="fas fa-save"></i> Simpan Perubahan
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeModal()">Batal</button>
+                </div>
+            `);
+        }
+
+        function saveUserEdit(userId) {
+            const userIndex = systemData.users.findIndex(u => u.id === userId);
+            
+            if (userIndex !== -1) {
+                systemData.users[userIndex].username = document.getElementById('editUsername').value;
+                systemData.users[userIndex].email = document.getElementById('editEmail').value;
+                systemData.users[userIndex].role = document.getElementById('editRole').value;
+                
+                saveSystemData();
+                
+                showNotification('Perubahan user berhasil disimpan', 'success');
+                closeModal();
+                loadUsersTable();
+                logActivity(`${currentUser.username} edited user: ${systemData.users[userIndex].username}`);
+            }
+        }
+
+        function deleteUser(userId) {
+            if (!confirm('Hapus user ini? Semua data user akan dihapus permanen.')) return;
+            
+            const userIndex = systemData.users.findIndex(u => u.id === userId);
+            
+            if (userIndex !== -1 && systemData.users[userIndex].id !== currentUser.id) {
+                const username = systemData.users[userIndex].username;
+                
+                // Remove user and all their data
+                systemData.users.splice(userIndex, 1);
+                systemData.diaries = systemData.diaries.filter(d => d.userId !== userId);
+                systemData.analyses = systemData.analyses.filter(a => a.userId !== userId);
+                
+                saveSystemData();
+                
+                showNotification(`User ${username} berhasil dihapus`, 'success');
+                loadUsersTable();
+                logActivity(`${currentUser.username} deleted user: ${username}`);
+            }
+        }
+
+        function showCreateUserModal() {
+            showModal(`
+                <div class="modal-header">
+                    <h3><i class="fas fa-user-plus"></i> Tambah User Baru</h3>
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" id="newUsername" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="newEmail" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="newUserPassword" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Role</label>
+                        <select id="newUserRole" class="form-control">
+                            <option value="USER">USER</option>
+                            <option value="ADMIN">ADMIN</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="createNewUser()">
+                        <i class="fas fa-user-plus"></i> Buat User
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeModal()">Batal</button>
+                </div>
+            `);
+        }
+
+        function createNewUser() {
+            const username = document.getElementById('newUsername').value;
+            const email = document.getElementById('newEmail').value;
+            const password = document.getElementById('newUserPassword').value;
+            const role = document.getElementById('newUserRole').value;
+            
+            if (!username || !email || !password) {
+                showNotification('Semua field harus diisi', 'error');
+                return;
+            }
+            
+            // Check uniqueness
+            const existingUser = systemData.users.find(u => 
+                u.username === username || u.email === email
+            );
+            
+            if (existingUser) {
+                showNotification('Username atau email sudah terdaftar', 'error');
+                return;
+            }
+            
+            const newUser = {
+                id: 'user_' + Date.now(),
+                username,
+                email,
+                password, // In real app, hash this
+                role: role, // Admin can create ADMIN users
+                createdAt: new Date().toISOString(),
+                settings: {}
+            };
+            
+            systemData.users.push(newUser);
+            saveSystemData();
+            
+            showNotification(`User ${username} berhasil dibuat`, 'success');
+            closeModal();
+            loadUsersTable();
+            logActivity(`${currentUser.username} created new user: ${username} (${role})`);
+        }
+
+        function logout() {
+            if (confirm('Yakin ingin logout?')) {
+                logActivity(`${currentUser.username} logged out`);
+                clearSession();
+                showAuth();
+                showNotification('Anda telah logout', 'info');
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        function changeTheme(theme) {
+            // Update active theme button
+            document.querySelectorAll('.theme-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // In real app, this would change CSS variables
+            showNotification(`Tema diubah ke ${theme}`, 'success');
+            
+            // Save preference
+            if (currentUser) {
+                currentUser.settings.theme = theme;
+                saveSystemData();
+            }
+        }
+
+        function changeFontSize(size) {
+            const sizes = {
+                small: '14px',
+                medium: '16px',
+                large: '18px'
+            };
+            
+            document.body.style.fontSize = sizes[size];
+            showNotification(`Ukuran font diubah ke ${size}`, 'success');
+            
+            // Save preference
+            if (currentUser) {
+                currentUser.settings.fontSize = size;
+                saveSystemData();
+            }
+        }
+
+        function exportData() {
+            if (!currentUser) return;
+            
+            const userData = {
+                user: currentUser,
+                diaries: systemData.diaries.filter(d => d.userId === currentUser.id),
+                analyses: systemData.analyses.filter(a => a.userId === currentUser.id)
+            };
+            
+            const dataStr = JSON.stringify(userData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `jejak-export-${currentUser.username}-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showNotification('Data berhasil diekspor', 'success');
+            logActivity(`${currentUser.username} exported their data`);
+        }
+
+        function refreshAnalysis() {
+            loadAnalysis();
+            showNotification('Analisis diperbarui', 'success');
+        }
+
+        function loadAccountInfo() {
+            if (!currentUser) return;
+            
+            document.getElementById('accountUsername').value = currentUser.username;
+            document.getElementById('accountEmail').value = currentUser.email;
+        }
+
+        function loadInsights() {
+            const container = document.getElementById('insightsContent');
+            
+            const insights = [
+                {
+                    title: "Kekuatan Refleksi",
+                    icon: "fas fa-brain",
+                    content: "Menulis secara teratur membantu otak memproses pengalaman dengan lebih efektif. Setiap kata yang Anda tulis adalah langkah menuju pemahaman diri yang lebih dalam.",
+                    color: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                },
+                {
+                    title: "Ritme Emosional",
+                    icon: "fas fa-wave-square",
+                    content: "Emosi memiliki ritme seperti gelombang. Mengenal pola naik-turun emosi membantu Anda mengantisipasi dan mengelola perasaan dengan lebih baik.",
+                    color: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+                },
+                {
+                    title: "Kebiasaan Mental",
+                    icon: "fas fa-seedling",
+                    content: "Pola pikir adalah kebiasaan yang dapat dibentuk. Dengan menulis, Anda menanam benih kesadaran yang akan tumbuh menjadi pola berpikir yang lebih sehat.",
+                    color: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+                },
+                {
+                    title: "Resiliensi Diri",
+                    icon: "fas fa-mountain",
+                    content: "Setiap tantangan yang Anda tulis dan hadapi dalam diary adalah batu loncatan menuju ketahanan mental yang lebih kuat. Anda lebih tangguh dari yang Anda sadari.",
+                    color: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+                }
+            ];
+            
+            let html = '';
+            insights.forEach(insight => {
+                html += `
+                    <div class="insight-card" style="background: ${insight.color};">
+                        <div class="insight-icon">
+                            <i class="${insight.icon}"></i>
+                        </div>
+                        <h3>${insight.title}</h3>
+                        <p>${insight.content}</p>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
